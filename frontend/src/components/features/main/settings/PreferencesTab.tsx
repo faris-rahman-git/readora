@@ -10,6 +10,7 @@ import type React from "react";
 import { useUpdatePreference } from "@/hooks/main/settings/useUpdatePreference";
 import { useDispatch } from "react-redux";
 import { hideLoader, showLoader } from "@/redux/features/common/LoaderSlice";
+import { updatePreferences } from "@/redux/features/auth/userSlice";
 
 function PreferencesTab({
   profileData,
@@ -39,7 +40,7 @@ function PreferencesTab({
     pref.toLowerCase().includes(preferenceSearch.toLowerCase())
   );
 
-  const { isPending, mutate } = useUpdatePreference();
+  const { isPending, mutate, isSuccess } = useUpdatePreference();
 
   const handleUpdatePreferences = () => {
     setShowPreferences(false);
@@ -51,6 +52,13 @@ function PreferencesTab({
     const pending = isPending;
     dispatch(pending ? showLoader() : hideLoader());
   }, [isPending]);
+
+  useEffect(() => {
+    if (isSuccess) {
+      console.log(profileData.preferences);
+      dispatch(updatePreferences({ preferences: profileData.preferences }));
+    }
+  }, [isSuccess]);
 
   return (
     <Card className="bg-slate-900 border-slate-800">

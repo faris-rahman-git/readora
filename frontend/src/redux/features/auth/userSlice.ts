@@ -39,8 +39,11 @@ const userSlice = createSlice({
       state.lastName = action.payload.user.lastName;
       state.avatar = action.payload.user.avatar;
     },
+    updatePreferences(state, action: PayloadAction<{ preferences: string[] }>) {
+      state.preferences = action.payload.preferences;
+    },
   },
 });
 
-export const { setUser, logout, updateUser } = userSlice.actions;
+export const { setUser, logout, updateUser ,updatePreferences} = userSlice.actions;
 export default userSlice.reducer;
