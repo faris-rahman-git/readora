@@ -12,7 +12,7 @@ import { hideLoader, showLoader } from "@/redux/features/common/LoaderSlice";
 import axios from "axios";
 import { useOtp } from "@/hooks/auth/useOtp";
 import { usePasswordAndSave } from "@/hooks/auth/usePasswordAndSave";
-import { validateEmail, validatePhone } from "@/utils/validate";
+import { validateDOB, validateEmail, validatePhone } from "@/utils/validate";
 
 export default function Register() {
   const dispatch = useDispatch();
@@ -73,6 +73,16 @@ export default function Register() {
       }));
       return;
     }
+
+    if (field === "dob") {
+      setValidationErrors((prev) => ({
+        ...prev,
+        dob:
+          value && !validateDOB(value)
+            ? "Please enter a valid Date of birth"
+            : "",
+      }));
+    }
   };
 
   const isPasswordValid = Object.values(passwordChecks).every((check) => check);
@@ -91,6 +101,7 @@ export default function Register() {
   const [validationErrors, setValidationErrors] = useState({
     email: "",
     phone: "",
+    dob: "",
   });
 
   const [otpError, setOtpError] = useState("");
@@ -123,6 +134,7 @@ export default function Register() {
       mutateRegister({
         email: formData.email,
         phone: formData.phone.replace(/\D/g, ""),
+        dob: formData.dob,
       });
     } else if (currentView === "otp") {
       const otpString = otp.join("");

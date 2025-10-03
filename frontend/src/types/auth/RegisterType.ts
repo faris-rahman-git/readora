@@ -1,6 +1,7 @@
 export type ValidationErrorsType = {
   email: string;
   phone: string;
+  dob: string;
 };
 
 export type RegisterDataForm = {

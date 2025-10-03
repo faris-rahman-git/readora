@@ -7,6 +7,7 @@ import {
   updateArticle,
 } from "../../service/main/article/articleService";
 import { UserPayloadType } from "../../types/authTypes";
+import { validateArticleField } from "../../utils/main/validateArticleField";
 
 export const publishArticleHandler = async (
   req: Request,
@@ -14,7 +15,13 @@ export const publishArticleHandler = async (
   next: NextFunction
 ) => {
   try {
-    await saveNewArticle(req.body);
+    const userId = req.user?.id!;
+    const data = req.body;
+    const check = await validateArticleField(data);
+    if (check.isError) {
+      return res.status(400).json({ message: check.errors });
+    }
+    await saveNewArticle({ ...data, author: userId });
     return res.status(200).json({});
   } catch (err) {
     next(err);
@@ -70,8 +77,13 @@ export const editArticleHandler = async (
 ) => {
   try {
     const { id } = req.user as UserPayloadType;
+    const data = req.body;
     const { articleId } = req.params;
-    await updateArticle(id, articleId, req.body);
+    const check = await validateArticleField(data);
+    if (check.isError) {
+      return res.status(400).json({ message: check.errors });
+    }
+    await updateArticle(id, articleId, data);
     return res.status(200).json({});
   } catch (err) {
     next(err);

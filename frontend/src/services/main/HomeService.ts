@@ -1,8 +1,19 @@
 import api from "@/configs/axios";
 const HOME_API = "/home";
 
-export const getAllArticleApi = async () => {
-  const res = await api.get(HOME_API + "/all-article");
+export const getAllArticleApi = async ({
+  selectedCategory,
+  searchQuery,
+  lastId,
+}: {
+  selectedCategory: string;
+  searchQuery: string;
+  lastId: string | null;
+}) => {
+  console.log(selectedCategory);
+  const res = await api.get(HOME_API + "/all-article", {
+    params: { selectedCategory, searchQuery, lastId },
+  });
   return res.data;
 };
 

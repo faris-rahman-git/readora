@@ -8,6 +8,7 @@ import {
   registerHandler,
   resentOtpHandler,
 } from "../../controllers/auth/AuthController";
+import { authRegisterMail } from "../../middleware/authRegisterMail";
 export const authRoute = Router();
 
 authRoute.post("/register", registerHandler);
@@ -16,7 +17,7 @@ authRoute.post("/otp", otpHandler);
 
 authRoute.post("/resentotp", resentOtpHandler);
 
-authRoute.post("/passwordandsave", passwordAndSaveHandler);
+authRoute.post("/passwordandsave", authRegisterMail, passwordAndSaveHandler);
 
 authRoute.post("/login", loginHandler);
 

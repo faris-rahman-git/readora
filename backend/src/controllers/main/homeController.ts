@@ -6,6 +6,7 @@ import {
   toggleDislikeArticle,
   toggleLikeArticle,
 } from "../../service/main/article/articleService";
+import { getUserPreferences } from "../../service/common/userService";
 
 export const allArticlesHandler = async (
   req: Request,
@@ -14,8 +15,19 @@ export const allArticlesHandler = async (
 ) => {
   try {
     const { id } = req.user as UserPayloadType;
-    const articles = await getAllArticles(id);
-    return res.status(200).json({ articles });
+    const { selectedCategory, searchQuery, lastId } = req.query;
+    let preferences: string[] = [];
+    if (selectedCategory === "Recommended") {
+      preferences = await getUserPreferences(id);
+    }
+    const { articles, nextToken } = await getAllArticles(
+      id,
+      selectedCategory as string,
+      searchQuery as string,
+      preferences,
+      lastId as string | undefined,
+    );
+    return res.status(200).json({ articles, nextToken });
   } catch (err) {
     next(err);
   }

@@ -75,6 +75,9 @@ export const updatePasswordHandler = async (
   try {
     const { id } = req.user as UserPayloadType;
     const { confirmPassword, password } = req.body;
+
+    
+
     if (password !== confirmPassword) {
       return res.status(400).json({ message: "Passwords do not match" });
     }

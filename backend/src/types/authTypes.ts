@@ -13,3 +13,7 @@ export type UserPayloadType = {
   id: string;
   email: string;
 };
+
+export type RegisterPayloadType = {
+  email: string;
+};

@@ -2,7 +2,11 @@ import api from "@/configs/axios";
 import type { RegisterDataForm } from "@/types/auth/RegisterType";
 const AUTH_API = "/auth";
 
-export const registerApi = async (data: { email: string; phone: string }) => {
+export const registerApi = async (data: {
+  email: string;
+  phone: string;
+  dob: string;
+}) => {
   const res = await api.post(AUTH_API + "/register", data);
   return res.data;
 };
@@ -12,7 +16,10 @@ export const otpApi = async (data: { otp: string; email: string }) => {
   return res.data;
 };
 
-export const resentOtpApi = async (data: { email: string , isRegister: boolean }) => {
+export const resentOtpApi = async (data: {
+  email: string;
+  isRegister: boolean;
+}) => {
   const res = await api.post(AUTH_API + "/resentotp", data);
   return res.data;
 };

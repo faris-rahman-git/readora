@@ -28,6 +28,8 @@ export default function Home() {
   const [articles, setArticles] = useState<AllArticlesType[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Recommended");
+  const [debouncedQuery, setDebouncedQuery] = useState(searchQuery);
+  const [nextToken, setNextToken] = useState<string | null>(null);
   const [showArticleModal, setShowArticleModal] = useState(false);
   const [blockArticleId, setBlockArticleId] = useState<string | null>(null);
   const [selectedArticle, setSelectedArticle] =
@@ -40,12 +42,40 @@ export default function Home() {
   const { mutate: mutateDislike } = useDislikeArticle();
 
   useEffect(() => {
-    mutate();
-  }, []);
+    const handler = setTimeout(() => {
+      setDebouncedQuery(searchQuery);
+    }, 500);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchQuery]);
+
+  useEffect(() => {
+    setArticles([]);
+    setNextToken(null);
+    mutate({ selectedCategory, searchQuery, lastId: null });
+  }, [selectedCategory, debouncedQuery]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (
+        window.innerHeight + window.scrollY >=
+          document.body.offsetHeight - 300 &&
+        nextToken
+      ) {
+        mutate({ selectedCategory, searchQuery, lastId: nextToken });
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [nextToken, selectedCategory, debouncedQuery]);
 
   useEffect(() => {
     if (isSuccess) {
-      setArticles(data.articles);
+      console.log(data);
+      setArticles((prev) => [...prev, ...data.articles]);
+      setNextToken(data.nextToken);
     }
   }, [isSuccess]);
 
@@ -144,8 +174,6 @@ export default function Home() {
         {/* Articles Grid */}
         <ArticlesGrid
           articles={articles}
-          searchQuery={searchQuery}
-          selectedCategory={selectedCategory}
           openArticle={openArticle}
           handleLike={handleLike}
           handleDislike={handleDislike}

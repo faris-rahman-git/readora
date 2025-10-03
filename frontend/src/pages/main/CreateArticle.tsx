@@ -8,17 +8,16 @@ import type {
   EditOrCreateArticleErrorType,
   EditOrCreateArticleType,
 } from "@/types/main/ArticleTypes";
-import type { RootState } from "@/redux/store";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { validateArticleField } from "@/utils/validateArticleField";
 import { usePublishArticle } from "@/hooks/main/article/usePublishArticle";
 import { hideLoader, showLoader } from "@/redux/features/common/LoaderSlice";
 import { useUploadImage } from "@/hooks/common/useUploadImage";
+import axios from "axios";
 
 export default function CreateArticle() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const userId = useSelector((state: RootState) => state.user.id)!;
   const [article, setArticle] = useState<EditOrCreateArticleType>({
     title: "",
     description: "",
@@ -26,7 +25,6 @@ export default function CreateArticle() {
     tags: [],
     coverImage: "",
     content: "",
-    author: userId,
   });
   const [fieldErrors, setFieldErrors] = useState<EditOrCreateArticleErrorType>({
     title: "",
@@ -38,7 +36,7 @@ export default function CreateArticle() {
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
 
-  const { isPending, isSuccess, mutate } = usePublishArticle();
+  const { isPending, isSuccess, mutate, isError, error } = usePublishArticle();
   const {
     isPending: isPendingUpload,
     mutate: mutateUpload,
@@ -77,6 +75,14 @@ export default function CreateArticle() {
       });
     }
   }, [isSuccessUpload]);
+
+  useEffect(() => {
+    if (isError) {
+      if (axios.isAxiosError(error)) {
+        setFieldErrors(error.response?.data?.message);
+      }
+    }
+  }, [isError]);
 
   useEffect(() => {
     const pending = isPending || isPendingUpload;

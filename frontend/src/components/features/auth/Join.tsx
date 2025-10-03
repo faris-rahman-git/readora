@@ -134,6 +134,12 @@ function Join({
           onChange={(e) => handleInputChange("dob", e.target.value)}
           className="h-12 border-slate-700 focus:ring-0 shadow-none rounded-lg bg-slate-900 text-white focus:border-emerald-500 transition-colors"
         />
+        {validationErrors.dob && (
+          <p className="text-sm text-red-400 flex items-center gap-1">
+            <AlertCircle className="h-4 w-4" />
+            {validationErrors.dob}
+          </p>
+        )}
       </div>
 
       <div className="space-y-2">

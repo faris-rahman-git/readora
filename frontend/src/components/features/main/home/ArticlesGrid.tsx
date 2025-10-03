@@ -10,8 +10,6 @@ import type { UserDataType } from "@/types/auth/LoginType";
 
 function ArticlesGrid({
   articles,
-  searchQuery,
-  selectedCategory,
   openArticle,
   handleLike,
   handleDislike,
@@ -19,36 +17,16 @@ function ArticlesGrid({
   user,
 }: {
   articles: AllArticlesType[];
-  searchQuery: string;
-  selectedCategory: string;
   openArticle: (article: AllArticlesType) => void;
   handleLike: (articleId: string) => void;
   handleDislike: (articleId: string) => void;
   setBlockArticleId: React.Dispatch<React.SetStateAction<string | null>>;
   user: UserDataType;
 }) {
-  const filteredArticles = articles.filter((article) => {
-    const matchesSearch =
-      article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      article.description.toLowerCase().includes(searchQuery.toLowerCase());
-
-    let matchesCategory = false;
-
-    if (selectedCategory === "All") {
-      matchesCategory = true;
-    } else if (selectedCategory === "Recommended") {
-      matchesCategory = user.preferences.includes(article.category);
-    } else {
-      matchesCategory = article.category === selectedCategory;
-    }
-
-    return matchesSearch && matchesCategory;
-  });
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {filteredArticles.length > 0 ? (
-        filteredArticles.map((article) => (
+      {articles.length > 0 ? (
+        articles.map((article) => (
           <Card
             key={article._id}
             className="bg-slate-900 border-slate-800 hover:border-slate-700 p-0 transition-colors"

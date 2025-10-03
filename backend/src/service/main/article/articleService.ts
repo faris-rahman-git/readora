@@ -55,19 +55,51 @@ export const updateArticle = async (
 ) => {
   await articleModel.findOneAndUpdate(
     { _id: articleId, author: userId },
-    { $set: data }
+    {
+      $set: {
+        title: data.title,
+        description: data.description,
+        category: data.category,
+        tags: data.tags,
+        coverImage: data.coverImage,
+        content: data.content,
+      },
+    }
   );
 };
 
-export const getAllArticles = async (userId: string) => {
+export const getAllArticles = async (
+  userId: string,
+  selectedCategory: string,
+  searchQuery: string,
+  preferences: string[],
+  lastId?: string,
+  limit = 6
+) => {
+  let category: any = {};
+  if (selectedCategory === "All") category = { $ne: "" };
+  else if (selectedCategory === "Recommended") category = preferences;
+  else category = selectedCategory;
+
+  const query: any = {
+    author: { $ne: userId },
+    blockedUsers: { $ne: userId },
+    category,
+    $or: [
+      { title: { $regex: searchQuery, $options: "i" } },
+      { description: { $regex: searchQuery, $options: "i" } },
+    ],
+  };
+
+  if (lastId) query._id = { $gt: lastId };
+
   const res = await articleModel
-    .find({
-      author: { $ne: userId },
-      blockedUsers: { $ne: userId },
-    })
+    .find(query)
+    .sort({ _id: 1 })
+    .limit(limit)
     .populate("author", "firstName lastName avatar");
 
-  return res.map((item) => {
+  const articles = res.map((item) => {
     const author = item.author as unknown as AuthorType;
     return {
       _id: item._id.toString(),
@@ -87,6 +119,11 @@ export const getAllArticles = async (userId: string) => {
       createdAt: item.createdAt,
     };
   });
+
+  const nextToken =
+    articles.length === limit ? articles[articles.length - 1]._id : null;
+
+  return { articles, nextToken };
 };
 
 export const blockArticle = async (articleId: string, userId: string) => {

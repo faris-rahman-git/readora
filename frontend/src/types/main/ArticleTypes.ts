@@ -6,13 +6,13 @@ export type EditOrCreateArticleType = {
   tags: string[];
   coverImage: string;
   content: string;
-  author?: string;
   createdAt?: Date;
+  author?: string;
 };
 
 export type EditOrCreateArticleErrorType = Omit<
   EditOrCreateArticleType,
-  "_id" | "createdAt" | "author" | "tags"
+  "_id" | "createdAt" | "tags"
 > & { tags: string };
 
 export type MyArticleType = Required<EditOrCreateArticleType> & {
@@ -20,5 +20,3 @@ export type MyArticleType = Required<EditOrCreateArticleType> & {
   disLikes: number;
   blockedUsers: number;
 };
-
-

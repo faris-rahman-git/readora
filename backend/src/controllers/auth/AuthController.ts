@@ -11,7 +11,10 @@ import {
   saveOtp,
   sendOtpEmail,
 } from "../../service/auth/otpService";
-import { validateFormData } from "../../utils/auth/validateFormData";
+import {
+  validateDOB,
+  validateFormData,
+} from "../../utils/auth/validateFormData";
 import {
   generatePassword,
   validatePassword,
@@ -20,6 +23,7 @@ import { createNewUser, verifyLogin } from "../../service/common/userService";
 import {
   createAccessToken,
   createRefreshToken,
+  createRegisterToken,
   verifyRefreshToken,
 } from "../../service/auth/tokenService";
 
@@ -29,7 +33,7 @@ export const registerHandler = async (
   next: NextFunction
 ) => {
   try {
-    const { email, phone } = req.body;
+    const { email, phone, dob } = req.body;
     if (!validateEmail(email)) {
       return res
         .status(400)
@@ -38,6 +42,11 @@ export const registerHandler = async (
     if (!validatePhone(phone)) {
       return res.status(400).json({
         message: { phone: "Please enter a valid 10-digit phone number" },
+      });
+    }
+    if (!validateDOB(dob)) {
+      return res.status(400).json({
+        message: { dob: "Please enter a valid date of birth" },
       });
     }
     const emailExist = await isEmailTaken(email);
@@ -57,23 +66,6 @@ export const registerHandler = async (
     await saveOtp(email, otp);
     console.log("registerHandler", otp);
     return res.status(200).json({});
-  } catch (err) {
-    next(err);
-  }
-};
-
-export const otpHandler = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const { otp, email } = req.body;
-    console.log("otpHandler", otp);
-
-    const isValid = await isOtpValid(email, otp);
-    if (isValid) return res.status(200).json({});
-    return res.status(400).json({ message: "Invalid OTP" });
   } catch (err) {
     next(err);
   }
@@ -108,6 +100,34 @@ export const resentOtpHandler = async (
   }
 };
 
+export const otpHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { otp, email } = req.body;
+    const isValid = await isOtpValid(email, otp);
+
+    if (!isValid) {
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
+
+    const payload = { email };
+    const registerToken = createRegisterToken(payload);
+
+    res.cookie("registerToken", registerToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      maxAge: 7 * 60 * 1000,
+    });
+    res.status(200).json({});
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const passwordAndSaveHandler = async (
   req: Request,
   res: Response,
@@ -126,7 +146,7 @@ export const passwordAndSaveHandler = async (
     } = req.body;
 
     const isValidForm = validateFormData(req.body);
-    if (!isValidForm) {
+    if (!isValidForm || !validateDOB(dob) || !validatePhone(phone)) {
       return res.status(400).json({ message: "Invalid form data" });
     }
     if (password !== confirmPassword) {

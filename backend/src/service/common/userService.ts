@@ -66,3 +66,8 @@ export const updatePreference = async (id: string, preferences: string[]) => {
 export const updatePassword = async (id: string, hashPassword: string) => {
   await userModel.findByIdAndUpdate(id, { $set: { password: hashPassword } });
 };
+
+export const getUserPreferences = async (id: string) => {
+  const res = await userModel.findById(id, { preferences: 1 });
+  return res!.preferences;
+};
