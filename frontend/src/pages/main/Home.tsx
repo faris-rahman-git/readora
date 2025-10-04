@@ -76,7 +76,8 @@ export default function Home() {
       console.log(data);
       setArticles((prev) => [...prev, ...data.articles]);
       setNextToken(data.nextToken);
-    }
+    } 
+    
   }, [isSuccess]);
 
   const handleLike = (articleId: string) => {

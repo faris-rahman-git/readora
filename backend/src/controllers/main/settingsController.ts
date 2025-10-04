@@ -76,13 +76,16 @@ export const updatePasswordHandler = async (
     const { id } = req.user as UserPayloadType;
     const { confirmPassword, password } = req.body;
 
-    
-
     if (password !== confirmPassword) {
       return res.status(400).json({ message: "Passwords do not match" });
     }
     const hashedPassword = await generatePassword(password);
     await updatePassword(id, hashedPassword);
+    res.clearCookie("registerToken", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+    });
     return res.status(200).json({});
   } catch (err) {
     next(err);

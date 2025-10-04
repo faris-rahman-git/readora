@@ -162,6 +162,11 @@ export const passwordAndSaveHandler = async (
       preferences,
       hashedPassword,
     });
+    res.clearCookie("registerToken", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+    });
     return res.status(200).json({});
   } catch (err) {
     next(err);
